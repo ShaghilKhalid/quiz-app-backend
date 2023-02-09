@@ -17,7 +17,6 @@ app.use(bodyParser.json());
 
 // Admin Login
 app.post("/adminLogin", async (req, res) => {
-
     let [rows] = await conn.execute("Select * from adminlogin where email=? ", [req.body.email])
     const passmatch = await bcrypt.compare(req.body.password, rows[0].password)
     if (passmatch === true) {
@@ -40,9 +39,7 @@ app.post("/adminLogin", async (req, res) => {
 })
 
 // Admin Sign Up
-
 app.post("/signupAdmin", async (req, res) => {
-
     try {
         const [rows1] = await conn.execute("Select * from adminlogin where email=?", [req.body.email]);
         if (rows1.length > 0) {
@@ -53,6 +50,52 @@ app.post("/signupAdmin", async (req, res) => {
         } else {
             const hashpassword = await bcrypt.hash(req.body.password, 12)
             const [rows] = await conn.execute(`INSERT INTO adminlogin (email,password) VALUES ('${req.body.email}','${hashpassword}')`);
+            if (rows.affectedRows === 1) {
+                return res.status(200).send({
+                    status: 200,
+                    message: "User Created Successfully"
+                })
+
+            }
+        }
+    } catch (err) {
+        console.log("err", err)
+    }
+})
+// Candidate Login
+app.post("/candidateLogin", async (req, res) => {
+    let [rows] = await conn.execute("Select * from candidate_login where email=? ", [req.body.email])
+    const passmatch = await bcrypt.compare(req.body.password, rows[0].password)
+    if (passmatch === true) {
+        var theToken = jwt.sign({ id: req.body.email }, "key", { expiresIn: "300s" });
+        return res.status(200).send({
+            status: 200,
+            data: rows,
+            token: theToken,
+            response: "Login successfully"
+
+        })
+    }
+    else {
+        return res.send({
+            message: "Incorrect password or email"
+        })
+    }
+
+
+})
+// Signup Candidate
+app.post("/signupCandidate", async (req, res) => {
+    try {
+        const [rows1] = await conn.execute("Select * from candidate_login where email=?", [req.body.email]);
+        if (rows1.length > 0) {
+            return res.status(201).send({
+                status: 201,
+                message: "User Already exist"
+            })
+        } else {
+            const hashpassword = await bcrypt.hash(req.body.password, 12)
+            const [rows] = await conn.execute(`INSERT INTO candidate_login (email,password) VALUES ('${req.body.email}','${hashpassword}')`);
             if (rows.affectedRows === 1) {
                 return res.status(200).send({
                     status: 200,
