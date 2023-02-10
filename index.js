@@ -101,7 +101,6 @@ app.post("/signupCandidate", async (req, res) => {
                     status: 200,
                     message: "User Created Successfully"
                 })
-
             }
         }
     } catch (err) {
