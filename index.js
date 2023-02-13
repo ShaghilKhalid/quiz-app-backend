@@ -36,8 +36,7 @@ app.post("/adminLogin", async (req, res) => {
     }
 
 
-})
-
+});
 // Admin Sign Up
 app.post("/signupAdmin", async (req, res) => {
     try {
@@ -61,7 +60,35 @@ app.post("/signupAdmin", async (req, res) => {
     } catch (err) {
         console.log("err", err)
     }
-})
+});
+// Get Admin by id 
+app.get("/getAdminById/:id", async (req, res) => {
+    try {
+        const [rows] = await conn.execute("Select * from adminlogin where id=?", [req.params.id]);
+        return res.status(200).send({
+            status: 200,
+            data: rows,
+            message: "Admin Id fetched!!!"
+        })
+    } catch (err) {
+        console.log("err", err)
+    }
+});
+// Get Candidate by id 
+app.get("/getCandidateByAdminId", async (req, res) => {
+    try {
+        // console.log("working")
+        // return
+        const [rows] = await conn.execute("Select * from adminlogin");
+        return res.status(200).send({
+            status: 200,
+            data: rows,
+            message: "Candidates fetched!!!"
+        })
+    } catch (err) {
+        console.log("err", err)
+    }
+});
 // Candidate Login
 app.post("/candidateLogin", async (req, res) => {
     let [rows] = await conn.execute("Select * from candidate_login where email=? ", [req.body.email])
@@ -83,7 +110,7 @@ app.post("/candidateLogin", async (req, res) => {
     }
 
 
-})
+});
 // Signup Candidate
 app.post("/signupCandidate", async (req, res) => {
     try {
@@ -95,7 +122,7 @@ app.post("/signupCandidate", async (req, res) => {
             })
         } else {
             const hashpassword = await bcrypt.hash(req.body.password, 12)
-            const [rows] = await conn.execute(`INSERT INTO candidate_login (email,password) VALUES ('${req.body.email}','${hashpassword}')`);
+            const [rows] = await conn.execute(`INSERT INTO candidate_login (email,password,user_id) VALUES ('${req.body.email}','${hashpassword}','${req.body.user_id}')`);
             if (rows.affectedRows === 1) {
                 return res.status(200).send({
                     status: 200,
@@ -106,6 +133,15 @@ app.post("/signupCandidate", async (req, res) => {
     } catch (err) {
         console.log("err", err)
     }
+});
+// Get Candidate
+app.get("/getCandidate", async (req, res) => {
+    const [rows] = await conn.execute("Select * from candidate_login")
+    return res.status(200).send({
+        status: 200,
+        data: rows,
+        message: "candidate fetched!!"
+    })
 })
 app.listen(port, () => console.log(`Listening on port ${port}`))
 
