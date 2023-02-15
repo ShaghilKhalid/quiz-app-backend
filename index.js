@@ -61,25 +61,10 @@ app.post("/signupAdmin", async (req, res) => {
         console.log("err", err)
     }
 });
-// Get Admin by id 
-app.get("/getAdminById/:id", async (req, res) => {
-    try {
-        const [rows] = await conn.execute("Select * from adminlogin where id=?", [req.params.id]);
-        return res.status(200).send({
-            status: 200,
-            data: rows,
-            message: "Admin Id fetched!!!"
-        })
-    } catch (err) {
-        console.log("err", err)
-    }
-});
 // Get Candidate by id 
-app.get("/getCandidateByAdminId", async (req, res) => {
+app.get("/getCandidate", async (req, res) => {
     try {
-        // console.log("working")
-        // return
-        const [rows] = await conn.execute("Select * from adminlogin");
+        const [rows] = await conn.execute("Select * from candidate_login");
         return res.status(200).send({
             status: 200,
             data: rows,
