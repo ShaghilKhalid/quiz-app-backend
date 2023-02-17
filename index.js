@@ -129,5 +129,19 @@ app.get("/getCandidate", async (req, res) => {
     })
 })
 app.listen(port, () => console.log(`Listening on port ${port}`))
+// Delete Candidate
+app.post("/deleteCandidate", async (req, res) => {
+    try {
+        const [rows] = await conn.execute("Delete from candidate_login where id=?", [req.body.id])
+        if (rows.affectedRows) {
+            return res.send({
+                status: 200,
+                message: "candidate_login Deleted"
+            })
+        }
+    } catch (error) {
+        console.log(error)
+    }
 
+})
 // Code for Shaghil
