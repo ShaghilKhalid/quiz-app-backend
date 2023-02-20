@@ -127,8 +127,7 @@ app.get("/getCandidate", async (req, res) => {
         data: rows,
         message: "candidate fetched!!"
     })
-})
-app.listen(port, () => console.log(`Listening on port ${port}`))
+});
 // Delete Candidate
 app.post("/deleteCandidate", async (req, res) => {
     try {
@@ -143,5 +142,21 @@ app.post("/deleteCandidate", async (req, res) => {
         console.log(error)
     }
 
-})
+});
+// Insert Questions
+app.post("/insertQuestions", async (req, res) => {
+    try {
+        const [rows] = await conn.execute(`INSERT INTO questions (question,user_id) VALUES ('${req.body.question}','${req.body.user_id}')`, [req.body.question], [req.body.user_id])
+        if (rows.affectedRows) {
+            return res.send({
+                status: 200,
+                message: "Question inserted"
+            })
+        }
+    } catch (error) {
+        console.log(error)
+    }
+
+});
+app.listen(port, () => console.log(`Listening on port ${port}`))
 // Code for Shaghil
