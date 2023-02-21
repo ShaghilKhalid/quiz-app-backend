@@ -143,6 +143,23 @@ app.post("/deleteCandidate", async (req, res) => {
     }
 
 });
+// Get Candidate by id
+app.get("/getCandidateById/:id", async (req, res) => {
+    try {
+        const [rows] = await conn.execute(`Select * from candidate_login where id=?`, [req.params.id])
+
+        if (rows.length > 0) {
+            return res.send({
+                status: 200,
+                data: rows,
+                message: "fetched!!!"
+            })
+        }
+    } catch (error) {
+        console.log(error)
+    }
+
+});
 // Insert Questions
 app.post("/insertQuestions", async (req, res) => {
     try {
