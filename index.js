@@ -175,5 +175,20 @@ app.post("/insertQuestions", async (req, res) => {
     }
 
 });
+// Get Questions
+app.get("/getQuestions", async (req, res) => {
+    try {
+        const [rows] = await conn.execute("Select * from questions")
+        return res.send({
+            status: 200,
+            data: rows,
+            message: "fetched"
+        })
+
+    } catch (error) {
+        console.log(error)
+    }
+
+});
 app.listen(port, () => console.log(`Listening on port ${port}`))
 // Code for Shaghil
