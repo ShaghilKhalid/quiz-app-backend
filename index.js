@@ -1,9 +1,11 @@
 // Import Packages
 const express = require("express");
 const bcrypt = require("bcrypt");
+const http = require('http')
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const socketio = require('socket.io')
 const conn = require("./DB/connection")
 const app = express();
 const port = 3001;
@@ -12,7 +14,15 @@ const port = 3001;
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
+const server = http.createServer(app)
+const io = socketio(server, {
+    transport: ["polling"],
+    cors: {
+        origin: "*",
 
+    }
+})
+const question = io.of('/questions')
 // Api's
 
 // Admin Login
@@ -161,20 +171,26 @@ app.get("/getCandidateById/:id", async (req, res) => {
 
 });
 // Insert Questions
-app.post("/insertQuestions", async (req, res) => {
-    try {
-        const [rows] = await conn.execute(`INSERT INTO questions (question,user_id) VALUES ('${req.body.question}','${req.body.user_id}')`, [req.body.question], [req.body.user_id])
-        if (rows.affectedRows) {
-            return res.send({
-                status: 200,
-                message: "Question inserted"
-            })
-        }
-    } catch (error) {
-        console.log(error)
-    }
+question.on("connection", (socket) => {
+    socket.on("message", (data) => {
+        console.log(data)
 
-});
+    })
+})
+// app.post("/insertQuestions", async (req, res) => {
+//     try {
+//         const [rows] = await conn.execute(`INSERT INTO questions (question,user_id) VALUES ('${req.body.question}','${req.body.user_id}')`, [req.body.question], [req.body.user_id])
+//         if (rows.affectedRows) {
+//             return res.send({
+//                 status: 200,
+//                 message: "Question inserted"
+//             })
+//         }
+//     } catch (error) {
+//         console.log(error)
+//     }
+
+// });
 // Get Questions
 app.get("/getQuestions", async (req, res) => {
     try {
