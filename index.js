@@ -1,30 +1,33 @@
 // Import Packages
+const { Server } = require('socket.io')
 const express = require("express");
+const http = require("http")
 const bcrypt = require("bcrypt");
-const http = require('http')
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const socketio = require('socket.io')
 const conn = require("./DB/connection")
 const app = express();
+const server = http.createServer(app, {
+    cors: {
+        origin: "*"
+    }
+})
 const port = 3001;
-
+require("events").EventEmitter.defaultMaxListeners = 20;
 // functions
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
-const server = http.createServer(app)
-const io = socketio(server, {
-    transport: ["polling"],
-    cors: {
-        origin: "*",
-
-    }
-})
-const question = io.of('/questions')
 // Api's
-
+const io = new Server(server)
+const test = io.of("/test")
+test.on("connection", (socket) => {
+    console.log(socket.id)
+    socket.on("message", (data) => {
+        console.log("data", data)
+    })
+})
 // Admin Login
 app.post("/adminLogin", async (req, res) => {
     let [rows] = await conn.execute("Select * from adminlogin where email=? ", [req.body.email])
@@ -171,26 +174,21 @@ app.get("/getCandidateById/:id", async (req, res) => {
 
 });
 // Insert Questions
-question.on("connection", (socket) => {
-    socket.on("message", (data) => {
-        console.log(data)
 
-    })
-})
-// app.post("/insertQuestions", async (req, res) => {
-//     try {
-//         const [rows] = await conn.execute(`INSERT INTO questions (question,user_id) VALUES ('${req.body.question}','${req.body.user_id}')`, [req.body.question], [req.body.user_id])
-//         if (rows.affectedRows) {
-//             return res.send({
-//                 status: 200,
-//                 message: "Question inserted"
-//             })
-//         }
-//     } catch (error) {
-//         console.log(error)
-//     }
+app.post("/insertQuestions", async (req, res) => {
+    try {
+        const [rows] = await conn.execute(`INSERT INTO questions (question,user_id) VALUES ('${req.body.question}','${req.body.user_id}')`, [req.body.question], [req.body.user_id])
+        if (rows.affectedRows) {
+            return res.send({
+                status: 200,
+                message: "Question inserted"
+            })
+        }
+    } catch (error) {
+        console.log(error)
+    }
 
-// });
+});
 // Get Questions
 app.get("/getQuestions", async (req, res) => {
     try {
