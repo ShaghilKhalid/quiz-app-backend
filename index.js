@@ -8,11 +8,6 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const conn = require("./DB/connection")
 const app = express();
-const server = http.createServer(app, {
-    cors: {
-        origin: "*"
-    }
-})
 const port = 3001;
 require("events").EventEmitter.defaultMaxListeners = 20;
 // functions
@@ -20,13 +15,22 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 // Api's
-const io = new Server(server)
-const test = io.of("/test")
-test.on("connection", (socket) => {
-    console.log(socket.id)
-    socket.on("message", (data) => {
-        console.log("data", data)
+const io = new Server(3002, {
+    transport: ['polling'],
+    cors: {
+        origin: "*"
+    }
+})
+const message = io.of("/message")
+message.on("connection", async (socket) => {
+    var [rows2] = await conn.execute('SELECT * FROM questions')
+    socket.on("message", async (data, data2) => {
+        const [rows] = await conn.execute("Insert into questions (`question`,`user_id`) value(?,?)", [data, data2])
+        var [rows2] = await conn.execute('SELECT * FROM questions')
+        socket.broadcast.emit("receive_message", rows2)
     })
+    socket.emit("receive_message", rows2)
+
 })
 // Admin Login
 app.post("/adminLogin", async (req, res) => {
