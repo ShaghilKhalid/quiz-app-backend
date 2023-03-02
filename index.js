@@ -22,16 +22,8 @@ const io = new Server(3002, {
     }
 })
 const message = io.of("/message")
-message.on("connection", async (socket) => {
-    var [rows2] = await conn.execute('SELECT * FROM questions')
-    socket.on("message", async (data, data2) => {
-        const [rows] = await conn.execute("Insert into questions (`question`,`user_id`) value(?,?)", [data, data2])
-        var [rows2] = await conn.execute('SELECT * FROM questions')
-        socket.broadcast.emit("receive_message", rows2)
-    })
-    socket.emit("receive_message", rows2)
+const answer = io.of("/answer")
 
-})
 // Admin Login
 app.post("/adminLogin", async (req, res) => {
     let [rows] = await conn.execute("Select * from adminlogin where email=? ", [req.body.email])
@@ -177,36 +169,28 @@ app.get("/getCandidateById/:id", async (req, res) => {
     }
 
 });
-// Insert Questions
+// Insert And Get Questions
+message.on("connection", async (socket) => {
+    var [rows2] = await conn.execute('SELECT * FROM questions')
+    socket.on("message", async (data, data2, data3) => {
+        const [rows] = await conn.execute("Insert into questions (`question`,`user_id`,`admin_id`) value(?,?,?)", [data, data2, data3])
+        var [rows2] = await conn.execute('SELECT * FROM questions')
+        socket.broadcast.emit("receive_message", rows2)
+    })
+    socket.emit("receive_message", rows2)
 
-app.post("/insertQuestions", async (req, res) => {
-    try {
-        const [rows] = await conn.execute(`INSERT INTO questions (question,user_id) VALUES ('${req.body.question}','${req.body.user_id}')`, [req.body.question], [req.body.user_id])
-        if (rows.affectedRows) {
-            return res.send({
-                status: 200,
-                message: "Question inserted"
-            })
-        }
-    } catch (error) {
-        console.log(error)
-    }
+})
+// Insert And Get Answers
+answer.on("connection", async (socket) => {
+    var [rows2] = await conn.execute('SELECT * FROM answers')
+    socket.on("answer", async (data, data2, data3, data4) => {
+        const [rows] = await conn.execute("Insert into answers (`answer`,`question`,`user_id`,`admin_id`) value(?,?,?,?)", [data, data2, data3, data4])
+        var [rows2] = await conn.execute('SELECT * FROM answers')
+        socket.broadcast.emit("receive_answer", rows2)
+    })
+    socket.emit("receive_answer", rows2)
 
-});
-// Get Questions
-app.get("/getQuestions", async (req, res) => {
-    try {
-        const [rows] = await conn.execute("Select * from questions")
-        return res.send({
-            status: 200,
-            data: rows,
-            message: "fetched"
-        })
+})
 
-    } catch (error) {
-        console.log(error)
-    }
-
-});
 app.listen(port, () => console.log(`Listening on port ${port}`))
-// Code for Shaghil
+// Code for Quiz App
