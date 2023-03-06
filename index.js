@@ -23,6 +23,7 @@ const io = new Server(3002, {
 })
 const message = io.of("/message")
 const answer = io.of("/answer")
+const status = io.of("/status")
 
 // Admin Login
 app.post("/adminLogin", async (req, res) => {
@@ -191,6 +192,14 @@ answer.on("connection", async (socket) => {
     socket.emit("receive_answer", rows2)
 
 })
-
+// Update status in Answers
+status.on("connection", async (socket) => {
+    var [rows2] = await conn.execute('SELECT * FROM answers')
+    socket.on("status", async (id, status) => {
+        console.log(id, status)
+        const [rows] = await conn.execute("Update `answers` SET `status`=? where `id`=? ", [status, id])
+        console.log(rows)
+    })
+})
 app.listen(port, () => console.log(`Listening on port ${port}`))
 // Code for Quiz App
