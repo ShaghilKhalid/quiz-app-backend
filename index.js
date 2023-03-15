@@ -192,6 +192,14 @@ answer.on("connection", async (socket) => {
     socket.emit("receive_answer", rows2)
 
 })
+app.get('/getAnswers', async (req, res) => {
+    const [rows] = await conn.execute("Select * from answers")
+    return res.status(200).send({
+        status: 200,
+        data: rows,
+        message: "answers fetched!!"
+    })
+})
 // Update status in Answers
 status.on("connection", async (socket) => {
     var [rows2] = await conn.execute('SELECT * FROM answers')
