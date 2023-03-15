@@ -21,10 +21,9 @@ const io = new Server(3002, {
         origin: "*"
     }
 })
-const message = io.of("/message")
-const answer = io.of("/answer")
-const status = io.of("/status")
-
+const message = io.of("/message");
+const answer = io.of("/answer");
+const status = io.of("/status");
 // Admin Login
 app.post("/adminLogin", async (req, res) => {
     let [rows] = await conn.execute("Select * from adminlogin where email=? ", [req.body.email])
@@ -204,9 +203,7 @@ app.get('/getAnswers', async (req, res) => {
 status.on("connection", async (socket) => {
     var [rows2] = await conn.execute('SELECT * FROM answers')
     socket.on("status", async (id, status) => {
-        console.log(id, status)
         const [rows] = await conn.execute("Update `answers` SET `status`=? where `id`=? ", [status, id])
-        console.log(rows)
     })
 })
 app.listen(port, () => console.log(`Listening on port ${port}`))
